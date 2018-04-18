@@ -51,6 +51,7 @@ public class ZeroJudgeB893 {
             if(count > 5){
                 break;
             }
+            ans1 = ans2 = 0;
         }
         
         /*
