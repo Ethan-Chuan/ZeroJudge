@@ -8,139 +8,172 @@ public class ZeroJudgeB905 {
     public static void main(String[] args){
         int n; //N datas
         
-       scanner = new Scanner(System.in);
+        scanner = new Scanner(System.in);
         n = scanner.nextInt();
         
-        tleError(n);
+        charAnswer(n);
     }
     
     
-    static void answer(int n){
-        char[] t;
-        String[] sp;
+    static void charAnswer(int n){
         for(int i=0;i<n;i++){
-            String slienced = scanner.next();
-            t = scanner.next().toCharArray();
+            String silenced = scanner.next();
+            char[] t = scanner.next().toCharArray();
             
-            boolean hasStarHead = slienced.startsWith("*");
-            boolean hasStarEnd = slienced.endsWith("*");
-            
-            if(hasStarHead){
-                slienced = slienced.replaceFirst("\\*+", "");
-            }
-            sp = slienced.split("\\*+");
-            
-            boolean isOriginal = true;
-            if(!sp[0].equals("") && !sp[0].isEmpty()){
-                int[] arr = judgeHead(hasStarHead, sp[0].toCharArray(), t,  0);
-                if(arr[0]==-1){
-                    isOriginal = false;
-                }else{
-                    if(sp.length==1){
-                        if(!hasStarEnd){
-                            if(hasStarHead){
-                                // Has at least one star at Head and Has no star at Tail.
-                                 isOriginal = judgeEnd(hasStarEnd, sp[0].toCharArray(), t, 0);
-                            }else{
-                                 if(t.length!=arr[1]){
-                                    // Has no star at Head and Tail.
-                                    isOriginal = false;
-                                }
-                            }
-                        }
-                    }else{
-                        if(!hasStarEnd){
-                             isOriginal = judgeEnd(hasStarEnd, sp[sp.length-1].toCharArray(),  t,  t.length-sp[sp.length-1].length());
-                        }
-                        if(isOriginal){
-                            for(int j=1;j<sp.length-1;j++){
-                                arr = judgeMiddle(sp[j].toCharArray(), t,  arr[1]);
-                                if(arr[0]==-1){
-                                    isOriginal = false;
-                                    break;
-                                }
-                            }
-                            if(isOriginal){
-                                if(hasStarEnd){
-                                    isOriginal = judgeEnd(hasStarEnd, sp[sp.length-1].toCharArray(),  t,  arr[1]);
-                                }else{
-                                    if(arr[1]>t.length-sp[sp.length-1].length()){
-                                        isOriginal = false;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            
-            System.out.println(isOriginal?"Yes":"No");
+            System.out.println(isOriginal(silenced,t)?"Yes":"No");
         }
     }
     
-    static int[] judgeHead(boolean hasStar, char[] s, char[] t, int posT){
-        int posS, nextPosT ;
-        if(hasStar){
-            return judgeMiddle(s, t, posT);
-        }else{
-            posS = s.length;
-            nextPosT = s.length;
-            for(int i=0;i<s.length;i++){
-                if(s[i]!=t[i+posT]){
-                    posS = -1;
-                    nextPosT = -1;
-                    break;
-                }
-            }
+    static boolean isOriginal(String silenced, char[] t){
+        boolean hasStarHead = silenced.startsWith("*");
+        boolean hasStarTail = silenced.endsWith("*");
+
+        if(hasStarHead){
+            silenced = silenced.replaceFirst("\\*+", "");
         }
-        return new int[]{posS, nextPosT};
-    }
-    
-    
-    static int[] judgeMiddle(char[] s, char[] t, int posT){
-        int posS=0, nextPosT=0 ;
-        for(int i=posT;i<t.length;i++){
-            if(s[posS]==t[i]){
-                posS++;
-                if(posS==s.length){
-                    nextPosT = i+1;
-                    break;
-                }
-            }else{
-                posS = 0;
-            }
-        }
-        if(posS != s.length){
-            posS = -1;
-            nextPosT = -1;
-        }
-        return new int[]{posS, nextPosT};
-    }
-    
-    static boolean judgeEnd(boolean hasStar, char[] s, char[] t, int posT){
-        boolean isOriginal = true;
+        String[] sp = silenced.split("\\*+");
         
-        if(hasStar){
-            int arr[] = judgeMiddle(s, t, posT);
+        int arr[] = new int[]{0,0};
+        
+        // There is no a * at Head.
+        int spFirstPos = 0;
+        if(!hasStarHead){
+            spFirstPos = 1;
+            
+            arr = judgeHead(sp[0].toCharArray(), t);
+            //System.out.println("At Head,  arr[0] : " + arr[0] + ",  arr[1] : " + arr[1]);
+            // Origianl sentence is not the same as silenced sentence.
             if(arr[0]==-1){
-                isOriginal = false;
-            }
-        }else{
-             int currentPosT = t.length - s.length;
-             for(int i=0;i<s.length;i++){
-                if(s[i]!=t[currentPosT+i]){
-                    isOriginal = false;
-                    break;
+                //System.out.println("There is no a * at Head.");
+                return false;
+            }else{
+                // At head, length of splitted sentence is equals to 1 and both string of two is the same.
+                if(sp.length==1 && t.length==sp[0].length()){
+                    //System.out.println("At head, length of Splitted sentence is equals to 1 and string is the same.");
+                    return true;
                 }
             }
         }
         
-        return isOriginal;
+        // There is no a * at Tail
+        int spLastPos=sp.length;
+        int tFirstPos = arr[1];
+        int tLastPos=t.length;
+        if(!hasStarTail){ 
+            //System.out.println("At tail.");
+            if(!judgeTail(sp[sp.length-1].toCharArray(), t, tFirstPos)){
+                //System.out.println("The last splitted sentence is not the same as the tail of original.");
+                return false;
+            }
+            // At tail, length of splitted sentence is equals to 1 and both string of two is not the same.
+            if(!hasStarHead && sp.length==1 && t.length!=sp[0].length()){
+                //System.out.println("At tail, length  of Splitted sentence is equals to 1 and string is not the same.");
+                return false;
+            }
+            spLastPos = spLastPos - 1;
+            tLastPos = tLastPos - sp[sp.length-1].length();
+        }
+        
+        // If length of splitted silenced sentence is equal to 1 and 
+        // it is empty or null string, then the silenced sentence 
+        // there is only * symbol, no other words.
+        if( sp.length==1 && (sp[0].isEmpty() || sp[0].equals("")) ){
+            return true;
+        }
+        
+        // Calculating middle
+        //System.out.println("spFirstPos : " + spFirstPos + ",  spLastPos : " + spLastPos + ",  t.length : " + t.length);
+        //System.out.println("Before judgeMiddle,  arr[0] : " + arr[0] + ",  arr[1] : " + arr[1] + ",  tLastPos : " + tLastPos);
+        for(int i=spFirstPos;i<spLastPos;i++){
+            arr = judgeMiddle(sp[i].toCharArray(), t, tFirstPos, tLastPos-sp[i].length());
+            //System.out.println("arr[0] : " + arr[0] + ",  arr[1] : " + arr[1] + ",  tLastPos : " + tLastPos);
+            // Origianl sentence is not the same as silenced sentence.
+            if(arr[0]==-1){
+                return false;
+            }else{
+                tFirstPos = arr[1];
+            }
+        }
+
+        return true;
+    }
+    
+    static int[] judgeHead(char[] spChar, char[] original){
+        int begin = 0;
+        int end = spChar.length;
+        
+        // If length of original sentence is short than 'end',
+        // it is not original.
+        if(end-begin > original.length){
+            return new int[]{-1,-1};
+        }
+        
+        // If the head of silenced and original sentence is not the same,
+        // it is not original.
+        for(int i=begin;i<end;i++){
+            if(spChar[i]!=original[i]){
+                return new int[]{-1,-1};
+            }
+        }
+        
+        // Found silenced sentence the same as splitted s.
+        // Return new start position.
+        return new int[]{end, end};
+    }
+    
+    
+    static int[] judgeMiddle(char[] spChar, char[] original, int tFirstPos, int tLastPos){
+        char first = spChar[0];
+        int max = Math.min((original.length - spChar.length), tLastPos);
+        
+        for(int i=tFirstPos;i<=max;i++){
+            // Look for first character.
+            if(original[i] != first){
+                while(++i <= max && original[i] != first);
+            }
+            
+            // Found first character, now look at the rest of spChar.
+            if(i <= max){
+                int j = i + 1;
+                int end = j + spChar.length - 1;
+                for(int k=1;j<end && original[j] == spChar[k] ; j++, k++);
+                
+                if(j==end){
+                    return new int[]{spChar.length, i+spChar.length};
+                }
+            }
+        }
+        
+        return new int[]{-1, -1};
+    }
+    
+    static boolean judgeTail(char[] spChar, char[] original, int tFistPos){  
+        int lastLength = spChar.length;
+        int begin = original.length-lastLength;
+        int end =  original.length;
+        
+        // The remaining length is insufficient.
+        if(begin < tFistPos){
+            return false;
+        }
+        
+        // If the tail of silenced and original sentence is not the same,
+        // it is not original.
+        for(int i=0;i<lastLength;i++){
+            if(spChar[i]!=original[begin+i]){
+                return false;
+            }
+        }
+        
+        // Found silenced sentence the same as splitted s.
+        // Return true.
+        return true;
     }
     
 
     
-    /*
+    /* ---------------------------------------------------------------------- */
+    /* 
     * Time Limit Exceed Algorithm.
     */
     static void tleError(int n){
@@ -156,14 +189,24 @@ public class ZeroJudgeB905 {
         }
     }
     
-    static boolean isOriginal(String s, StringBuilder o){
-        String[] sp = s.split("\\*");
+    static boolean isOriginal(String silenced, StringBuilder o){
+        
+        boolean hasStarHead = silenced.startsWith("*");
+        boolean hasStarTail = silenced.endsWith("*");
+
+        if(hasStarHead){
+            silenced = silenced.replaceFirst("\\*+", "");
+        }
+        String[] sp = silenced.split("\\*+");
+        
         
         /*
         * If there is no a * at head, 
         * then check that the head of s and o is the same.
         */
-        if(!s.startsWith("*")){
+        int spFirstPos = 0;
+        if(!hasStarHead){
+            spFirstPos = 1;
             int begin = 0;
             int end = sp[0].length();
             if(end-begin > o.length()){
@@ -173,7 +216,7 @@ public class ZeroJudgeB905 {
                 return false;
             }else{
                 o.delete(0, sp[0].length());
-                if(o.length()==0 && s.equals(sp[0])){
+                if(o.length()==0 && silenced.equals(sp[0])){
                     return true;
                 }
             }
@@ -182,12 +225,13 @@ public class ZeroJudgeB905 {
         * If there is no a * at tail, 
         * then check that the tail of s and o is the same.
         */
-        if(!s.endsWith("*")){
+        int spLastPos = sp.length;
+        if(!hasStarTail){
+            spLastPos = spLastPos-1;
             int lastLength = sp[sp.length-1].length();
             int begin = o.length()-lastLength;
             int end =  o.length();
             if(end-begin > o.length()){
-                System.out.println(end-begin + ",  " +  o.length());
                 return false;
             }
             if(!sp[sp.length-1].equals(o.subSequence(begin ,end))){
@@ -196,14 +240,19 @@ public class ZeroJudgeB905 {
                 o.delete(begin, end);
             }
         }
+        
+        // If length of splitted silenced sentence is equal to 1 and 
+        // it is empty or null string, then the silenced sentence 
+        // there is only * symbol, no other words.
+        if( sp.length==1 && (sp[0].isEmpty() || sp[0].equals("")) ){
+            return true;
+        }
+        
+        
         /*
         * Check that middle string of t whether contains substrings of splitted s.
         */
-        for(int i=1;i<=sp.length-2;i++){
-            if(sp[i].isEmpty() || sp[i].equals("")){
-                continue;
-            }
-            
+        for(int i=spFirstPos;i<spLastPos;i++){
             int begin = o.indexOf(sp[i]);
             if(begin==-1){
                 return false;
@@ -211,6 +260,7 @@ public class ZeroJudgeB905 {
                 o.delete(0, begin + sp[i].length());
             }
         }
+
         return true;
     }
 }
@@ -262,7 +312,7 @@ jsdkjaajfaakdjksaaaaafjkjdkaaaaaa
 
 1
 a*a**aaaa*
-ajbdsfjipajkdiweafjkciuaaajdifwopgnduiaaa
+ajbdsfjipaafjkciuaaajdifwopgnduiaaa
 
 
 1
@@ -306,6 +356,9 @@ aba
 *ba
 aba
 
+1
+abc
+abc
 
 
 
