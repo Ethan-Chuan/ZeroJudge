@@ -17,23 +17,21 @@ public class ZeroJudgeB924 {
     static StringTokenizer st;
 
     public static void main(String[] args) throws IOException {
-        int n = 0, m = 0;
-        int[] vertices;
-        int countOddDegree;
 
         // An undirected graph has an Eulerian trail if and only if
         // exactly zero or two vertices have odd degree, 
         // and all of its vertices with nonzero degree 
         // belong to a single connected component.
-        String str;
-        while ( (str = br.readLine()) != null && str.length()!=0) {
-            st = new StringTokenizer(str);
-            n = nextInt() + 1;
-            m = nextInt();
+        String strLine;
+        while ( (strLine = br.readLine()) != null ) {
+            
+            st = new StringTokenizer(strLine);
+            int n = nextInt() + 1;
+            int m = nextInt();
             //System.out.println("n : " + n + ",  m : " + m);
             
-            vertices = new int[n];
-            countOddDegree = 0;
+            int[] vertices = new int[n];
+            int countOddDegree = 0;
             int i;
 
             for (i = 0; i < m; i++) {
@@ -52,7 +50,7 @@ public class ZeroJudgeB924 {
         }
 
     }
-
+    
     static String next() {
         while (st == null || !st.hasMoreElements()) {
             try {
