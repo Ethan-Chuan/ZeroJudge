@@ -22,7 +22,7 @@ public class ZeroJudgeA010 {
         }*/
         
         while(scanner.hasNext()){
-            
+            primeFactorization(scanner.nextInt());
         }
     }
     
@@ -56,6 +56,22 @@ public class ZeroJudgeA010 {
     }
     
     static void primeFactorization(int x){
-        
+        String ret = "";
+        for(int i=0;i<lenPrime;i++){
+            int count = 0;
+            while(x%prime[i]==0){
+                x /= prime[i];
+                count++;
+            }
+            if(count>0){
+                ret += " * " + prime[i];
+                if(count>1)
+                    ret += "^" + count;
+            }
+        }
+        if(x!=1){
+            ret += " * " + x;
+        }
+        System.out.println(ret.substring(3));
     }
 }
